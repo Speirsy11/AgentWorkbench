@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tradingagents"
-version = "0.2.4"
-description = "TradingAgents: Multi-Agents LLM Financial Trading Framework"
+name = "agentworkbench"
+version = "0.3.0"
+description = "AgentWorkbench: configurable multi-agent workflows for analysing anything from reusable role and data-pack templates"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -34,12 +34,14 @@ dependencies = [
 
 [project.scripts]
 tradingagents = "cli.main:app"
+agentworkbench = "agentworkbench.cli:app"
 
 [tool.setuptools.packages.find]
-include = ["tradingagents*", "cli*"]
+include = ["tradingagents*", "agentworkbench*", "cli*"]
 
 [tool.setuptools.package-data]
 cli = ["static/*"]
+agentworkbench = ["templates/*.json", "data_packs/**/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -25,6 +25,41 @@
 
 ---
 
+# AgentWorkbench
+
+AgentWorkbench generalises the original TradingAgents finance workflow into a configurable multi-agent workflow platform. The old trading graph remains available as the `trading_agents_legacy` workflow, while new templates can analyse any subject if you provide:
+
+- a workflow JSON file defining interchangeable agent roles and execution order
+- one or more data-pack files containing the facts/context for the thing being analysed
+- an LLM provider/model, including the local authenticated Codex CLI provider
+
+## AgentWorkbench quick start
+
+```bash
+# List reusable workflow templates
+agentworkbench workflows
+
+# Run a generic workflow over a subject and optional data file
+agentworkbench run "BTC-USD" --workflow market_research --data-file ./my-btc-brief.md
+
+# Start the lightweight web UI for managing workflows and runs
+agentworkbench web --port 8765
+```
+
+The web UI is intentionally dependency-light and runs at `http://127.0.0.1:8765` by default. Reports are stored under `~/.agentworkbench/runs` unless `AGENTWORKBENCH_RUNS_DIR` is set.
+
+## Built-in workflow options
+
+- `general_research` — analyst → critic → decision synthesiser for any topic.
+- `market_research` — a generic version of the TradingAgents-style context/bull/bear/risk/decision flow.
+- `trading_agents_legacy` — the original finance-specific TradingAgents graph preserved as a selectable workflow.
+
+## Defining your own workflow
+
+Create a JSON file like `agentworkbench/templates/general_research.json` with `roles`, `flow`, and optional `default_data_files`. Each role gets the subject, objective, supplied data pack, and prior role outputs. This makes the agent roles and analysed thing interchangeable without changing Python code.
+
+---
+
 # TradingAgents: Multi-Agents LLM Financial Trading Framework
 
 ## News

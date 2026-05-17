@@ -1,0 +1,27 @@
+{
+  "id": "general_research",
+  "name": "General Research Council",
+  "description": "A reusable analyst → critic → decision-maker flow for any subject with a supplied data pack.",
+  "default_data_files": ["data_packs/trading/btc_sample.md"],
+  "roles": [
+    {
+      "id": "analyst",
+      "name": "Primary Analyst",
+      "goal": "Extract the strongest useful facts, constraints, and options from the supplied data.",
+      "prompt": "Summarise the subject, identify relevant evidence, and propose 2-4 plausible interpretations or paths forward."
+    },
+    {
+      "id": "critic",
+      "name": "Skeptical Critic",
+      "goal": "Find weak assumptions, missing data, risks, and ways the primary analysis could be wrong.",
+      "prompt": "Challenge the prior analysis. Focus on uncertainty, counterexamples, operational risks, and hidden dependencies."
+    },
+    {
+      "id": "decision",
+      "name": "Decision Synthesiser",
+      "goal": "Produce a clear recommendation that accounts for the analysis and critique.",
+      "prompt": "Synthesize the prior outputs into a decision-ready recommendation with confidence, next steps, and missing inputs."
+    }
+  ],
+  "flow": ["analyst", "critic", "decision"]
+}

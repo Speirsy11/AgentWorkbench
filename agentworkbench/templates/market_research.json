@@ -1,0 +1,14 @@
+{
+  "id": "market_research",
+  "name": "Market Research Board",
+  "description": "A generic version of the TradingAgents style flow for assets, products, companies, projects, or ideas.",
+  "default_data_files": ["data_packs/trading/btc_sample.md"],
+  "roles": [
+    {"id":"context","name":"Context Analyst","goal":"Ground the subject in the supplied facts.","prompt":"Create a concise factual brief. Separate observed data from inference."},
+    {"id":"bull","name":"Bull Case Researcher","goal":"Argue the optimistic case.","prompt":"Make the strongest constructive case for action or upside. Use evidence only from the data pack or clearly marked inference."},
+    {"id":"bear","name":"Bear Case Researcher","goal":"Argue the pessimistic case.","prompt":"Make the strongest skeptical case. Identify downside, fragility, missing inputs, and reasons to wait."},
+    {"id":"risk","name":"Risk Manager","goal":"Translate disagreement into risk controls.","prompt":"List key risks, mitigations, and conditions that would change the recommendation."},
+    {"id":"portfolio","name":"Portfolio / Decision Manager","goal":"Make a final call.","prompt":"Weigh the prior roles and return a final stance, confidence, and concrete next steps."}
+  ],
+  "flow": ["context", "bull", "bear", "risk", "portfolio"]
+}

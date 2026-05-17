@@ -1,0 +1,9 @@
+{
+  "id": "trading_agents_legacy",
+  "name": "TradingAgents Legacy Finance Flow",
+  "description": "The original finance/trading graph preserved as one selectable workflow option.",
+  "legacy_runner": "tradingagents",
+  "default_data_files": [],
+  "roles": [],
+  "flow": []
+}
