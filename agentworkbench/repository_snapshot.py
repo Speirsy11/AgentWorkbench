@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 from dataclasses import dataclass, asdict
+from urllib.parse import urlparse
 from pathlib import Path
 
 DEFAULT_EXCLUDES = {
@@ -90,6 +91,7 @@ PRIORITY_NAMES = {
 class RepositorySnapshot:
     repo_path: str
     git_head: str | None
+    pull_request: str | None
     total_files_seen: int
     files_included: int
     bytes_included: int
@@ -102,11 +104,15 @@ class RepositorySnapshot:
         return raw
 
 
-def _git(repo: Path, args: list[str]) -> str | None:
+def _run(command: list[str], *, cwd: Path | None = None) -> str | None:
     try:
-        return subprocess.check_output(["git", *args], cwd=repo, text=True, stderr=subprocess.DEVNULL).strip()
+        return subprocess.check_output(command, cwd=cwd, text=True, stderr=subprocess.DEVNULL).strip()
     except Exception:
         return None
+
+
+def _git(repo: Path, args: list[str]) -> str | None:
+    return _run(["git", *args], cwd=repo)
 
 
 def _candidate_files(repo: Path) -> list[Path]:
@@ -141,7 +147,35 @@ def _sort_key(path: Path) -> tuple[int, int, str]:
     return (priority, depth, str(path))
 
 
-def create_repository_snapshot(repo_path: str | Path, *, max_bytes: int = 180_000, max_file_bytes: int = 24_000) -> RepositorySnapshot:
+def _format_pr_identifier(pr: str) -> str:
+    parsed = urlparse(pr)
+    if parsed.scheme and parsed.netloc.endswith("github.com"):
+        parts = [part for part in parsed.path.strip("/").split("/") if part]
+        if len(parts) >= 4 and parts[2] == "pull":
+            return f"{parts[0]}/{parts[1]}#{parts[3]}"
+    return pr
+
+
+def _pr_metadata(repo: Path, pr: str) -> str:
+    formatted = _format_pr_identifier(pr)
+    json_text = _run([
+        "gh",
+        "pr",
+        "view",
+        pr,
+        "--json",
+        "number,title,state,author,baseRefName,headRefName,url,body,additions,deletions,changedFiles",
+    ], cwd=repo)
+    diff = _run(["gh", "pr", "diff", pr, "--patch"], cwd=repo)
+    parts = [f"# Pull request snapshot\n\nPR: {formatted}"]
+    if json_text:
+        parts.append(f"# Pull request metadata\n```json\n{json_text}\n```")
+    if diff:
+        parts.append(f"# Pull request patch\n```diff\n{diff[:80_000]}\n```" + ("\n[PR patch truncated for review snapshot]" if len(diff) > 80_000 else ""))
+    return "\n\n---\n\n".join(parts)
+
+
+def create_repository_snapshot(repo_path: str | Path, *, pr: str | None = None, max_bytes: int = 180_000, max_file_bytes: int = 24_000) -> RepositorySnapshot:
     repo = Path(repo_path).expanduser().resolve()
     if not repo.exists() or not repo.is_dir():
         raise FileNotFoundError(f"Repository path not found: {repo}")
@@ -151,10 +185,13 @@ def create_repository_snapshot(repo_path: str | Path, *, max_bytes: int = 180_00
     git_status = _git(repo, ["status", "--short"]) or "clean"
     tree_lines = [str(path.relative_to(repo)) for path in files]
 
-    sections = [
+    sections = []
+    if pr:
+        sections.append(_pr_metadata(repo, pr))
+    sections.extend([
         f"# Repository snapshot\n\nPath: {repo}\nGit HEAD: {git_head or 'unknown'}\nGit status:\n```\n{git_status}\n```",
         "# File tree\n```\n" + "\n".join(tree_lines[:500]) + ("\n..." if len(tree_lines) > 500 else "") + "\n```",
-    ]
+    ])
 
     used = sum(len(section.encode("utf-8")) for section in sections)
     included = 0
@@ -184,6 +221,7 @@ def create_repository_snapshot(repo_path: str | Path, *, max_bytes: int = 180_00
     return RepositorySnapshot(
         repo_path=str(repo),
         git_head=git_head,
+        pull_request=_format_pr_identifier(pr) if pr else None,
         total_files_seen=len(files),
         files_included=included,
         bytes_included=used,

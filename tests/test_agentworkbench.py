@@ -49,6 +49,20 @@ def test_repository_snapshot_excludes_secrets(tmp_path):
     (repo / "app.py").write_text("print('hello')")
     (repo / ".env").write_text("SECRET=do-not-include")
     snapshot = create_repository_snapshot(repo, max_bytes=10_000)
+    assert snapshot.pull_request is None
     assert "app.py" in snapshot.content
     assert "SECRET=do-not-include" not in snapshot.content
     assert snapshot.files_included >= 2
+
+
+def test_repository_snapshot_formats_pr_url(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "README.md").write_text("# Demo")
+    snapshot = create_repository_snapshot(
+        repo,
+        pr="https://github.com/example/demo/pull/42",
+        max_bytes=10_000,
+    )
+    assert snapshot.pull_request == "example/demo#42"
+    assert "Pull request snapshot" in snapshot.content

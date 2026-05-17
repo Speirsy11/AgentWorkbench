@@ -64,6 +64,13 @@ agentworkbench run "AgentWorkbench" \
   --workflow code_review_board \
   --repo-path /Users/charliespeirs/Developer/AgentWorkbench \
   --objective "Perform a comprehensive code review and produce fix prompts."
+
+# Review a specific GitHub PR with metadata and patch context
+agentworkbench run "PR #12 review" \
+  --workflow code_review_board \
+  --repo-path /Users/charliespeirs/Developer/AgentWorkbench \
+  --pr 12 \
+  --objective "Review this pull request and produce fix prompts."
 ```
 
 The workflow uses these roles:

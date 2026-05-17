@@ -95,6 +95,7 @@ def run_generic_workflow(
     objective: str,
     data_files: list[str] | None = None,
     repo_path: str | None = None,
+    pr: str | None = None,
     max_repo_bytes: int = 180_000,
     llm_provider: str = "codex",
     model: str = "default",
@@ -107,7 +108,7 @@ def run_generic_workflow(
     if data_files:
         data_pack_parts.append(load_data_pack(data_files))
     if repo_path:
-        snapshot = create_repository_snapshot(repo_path, max_bytes=max_repo_bytes)
+        snapshot = create_repository_snapshot(repo_path, pr=pr, max_bytes=max_repo_bytes)
         data_pack_parts.append(snapshot.content)
         source_metadata["repository_snapshot"] = snapshot.metadata()
     data_pack = "\n\n---\n\n".join(part for part in data_pack_parts if part)
@@ -141,6 +142,7 @@ def run_generic_workflow(
         "objective": objective,
         "data_files": data_files,
         "repo_path": repo_path,
+        "pull_request": pr,
         "source_metadata": source_metadata,
         "llm_provider": llm_provider,
         "model": model,
@@ -181,6 +183,7 @@ def run_workflow(
     objective: str,
     data_files: list[str] | None = None,
     repo_path: str | None = None,
+    pr: str | None = None,
     max_repo_bytes: int = 180_000,
     llm_provider: str = "codex",
     model: str = "default",
@@ -200,6 +203,7 @@ def run_workflow(
         objective=objective,
         data_files=data_files,
         repo_path=repo_path,
+        pr=pr,
         max_repo_bytes=max_repo_bytes,
         llm_provider=llm_provider,
         model=model,
@@ -227,6 +231,7 @@ def render_report(run: dict[str, Any]) -> str:
             "",
             f"- Repository: `{repo_snapshot.get('repo_path')}`",
             f"- Git HEAD: `{repo_snapshot.get('git_head') or 'unknown'}`",
+            *([f"- Pull request: `{repo_snapshot.get('pull_request')}`"] if repo_snapshot.get("pull_request") else []),
             f"- Files included: {repo_snapshot.get('files_included')} / {repo_snapshot.get('total_files_seen')}",
             f"- Snapshot bytes: {repo_snapshot.get('bytes_included')}",
             f"- Truncated: {repo_snapshot.get('truncated')}",

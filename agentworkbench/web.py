@@ -36,6 +36,7 @@ a{{color:#93c5fd}} .grid{{display:grid;grid-template-columns:1fr 1fr;gap:1rem}}
 <label>Objective<textarea name="objective" rows="3">Produce a decision-ready analysis.</textarea></label>
 <div class="grid"><label>LLM provider<input name="llm_provider" value="codex"></label><label>Model<input name="model" value="default"></label></div>
 <label>Repository path (optional)<input name="repo_path" placeholder="/Users/you/Developer/my-repo"></label>
+<label>Pull request number/URL (optional, requires repo path)<input name="pr" placeholder="12 or https://github.com/owner/repo/pull/12"></label>
 <label>Data files (comma-separated paths, optional)<input name="data_files" placeholder="docs/brief.md,/tmp/data.txt"></label>
 <label><button type="submit">Run workflow</button></label>
 </form></div>
@@ -82,6 +83,7 @@ class Handler(BaseHTTPRequestHandler):
         data_files_raw = form.get("data_files", [""])[0].strip()
         data_files = [part.strip() for part in data_files_raw.split(",") if part.strip()] or None
         repo_path = form.get("repo_path", [""])[0].strip() or None
+        pr = form.get("pr", [""])[0].strip() or None
         try:
             payload = run_workflow(
                 form.get("workflow", ["general_research"])[0],
@@ -89,6 +91,7 @@ class Handler(BaseHTTPRequestHandler):
                 objective=form.get("objective", ["Produce a decision-ready analysis."])[0],
                 data_files=data_files,
                 repo_path=repo_path,
+                pr=pr,
                 llm_provider=form.get("llm_provider", ["codex"])[0],
                 model=form.get("model", ["default"])[0],
             )
