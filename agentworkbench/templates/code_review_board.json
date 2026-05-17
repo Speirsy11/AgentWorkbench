@@ -1,0 +1,80 @@
+{
+  "id": "code_review_board",
+  "name": "Code Review Board",
+  "description": "A thorough multi-agent repository review with architecture, correctness, security, testing, DX, docs, and fix prompts.",
+  "default_data_files": [],
+  "roles": [
+    {
+      "id": "repo_cartographer",
+      "name": "Repository Cartographer",
+      "goal": "Map the repository structure, purpose, technology stack, and likely execution paths before deeper review.",
+      "prompt": "Read the repository snapshot as a reviewer. Identify the app/library purpose, stack, package layout, important entry points, build/test commands inferred from config, and any files missing from the snapshot that limit confidence. Produce a short orientation for the later reviewers."
+    },
+    {
+      "id": "architecture_reviewer",
+      "name": "Architecture Reviewer",
+      "goal": "Evaluate system design, boundaries, coupling, cohesion, extensibility, and maintainability.",
+      "prompt": "Review architecture and module boundaries. Look for layering issues, unclear ownership, over-coupling, duplicated concepts, leaky abstractions, poor naming, and places where future changes will be expensive. For each issue include severity, evidence from files, why it matters, and a concrete improvement."
+    },
+    {
+      "id": "correctness_reviewer",
+      "name": "Correctness & Edge-Case Reviewer",
+      "goal": "Find likely bugs, edge cases, error handling gaps, and incorrect assumptions.",
+      "prompt": "Review for functional correctness. Focus on edge cases, invalid input, race conditions, state handling, date/time/path issues, network failure handling, async/concurrency bugs, and inconsistent behaviour. Avoid inventing bugs; cite evidence from the snapshot and state confidence."
+    },
+    {
+      "id": "security_reviewer",
+      "name": "Security & Privacy Reviewer",
+      "goal": "Identify security, privacy, secret-handling, auth, injection, dependency, and data exposure risks.",
+      "prompt": "Threat-model the repository from the code shown. Look for unsafe file access, command execution, SSRF/path traversal/injection, auth gaps, secret leakage, insecure defaults, excessive logging, data retention/privacy issues, and unsafe dependency or CI practices. Provide practical fixes and note what could not be assessed from the snapshot."
+    },
+    {
+      "id": "test_reviewer",
+      "name": "Testing & Quality Reviewer",
+      "goal": "Assess test coverage, test quality, regression risk, and verification commands.",
+      "prompt": "Review the apparent test strategy and quality gates. Identify critical untested paths, weak assertions, missing integration/smoke tests, flaky-test risks, and recommended test cases. Include exact test ideas and suggested commands where possible."
+    },
+    {
+      "id": "performance_reviewer",
+      "name": "Performance & Scalability Reviewer",
+      "goal": "Find obvious performance, memory, I/O, database, network, and scalability risks.",
+      "prompt": "Review for performance and scalability risks. Look for unbounded reads, expensive loops, repeated network calls, missing caching, large prompt/data handling issues, inefficient DB/API usage, and blocking operations. Prioritise issues that matter for realistic usage."
+    },
+    {
+      "id": "developer_experience_reviewer",
+      "name": "Developer Experience Reviewer",
+      "goal": "Evaluate ease of setup, local development, CLI/API ergonomics, config, errors, and maintainability for contributors.",
+      "prompt": "Review developer experience. Look at setup clarity, commands, config, error messages, file organization, type hints, generated artifacts, local workflows, and how easy it is for a new developer or coding agent to fix issues safely."
+    },
+    {
+      "id": "documentation_reviewer",
+      "name": "Documentation & User Experience Reviewer",
+      "goal": "Assess README/docs/API guidance and the user-facing clarity of outputs or interfaces.",
+      "prompt": "Review documentation and user-facing output. Identify gaps in README, examples, CLI/web usage, configuration, limitations, troubleshooting, and result presentation. Suggest specific doc sections or copy improvements."
+    },
+    {
+      "id": "fix_prompt_writer",
+      "name": "AI Fix Prompt Writer",
+      "goal": "Convert the most important findings into safe, actionable prompts that a coding agent or developer can use to fix them.",
+      "prompt": "Using all prior reviewer outputs, write implementation-ready fix prompts. Group by priority. Each prompt must include: title, context, files likely involved, exact desired change, constraints, validation commands, and acceptance criteria. Prompts should be safe for a coding agent to execute without broad rewrites or secret exposure."
+    },
+    {
+      "id": "review_chair",
+      "name": "Review Chair",
+      "goal": "Produce the final polished code review report for the user.",
+      "prompt": "Synthesize all prior outputs into a polished final code review. Include: executive summary, overall health score, top 5 risks, quick wins, deeper refactors, security/privacy notes, testing gaps, documentation gaps, prioritised action plan, and a dedicated 'Ready-to-use AI fix prompts' section. Make it clear, practical, and pleasant to read. Separate high-confidence findings from uncertain ones caused by snapshot limits."
+    }
+  ],
+  "flow": [
+    "repo_cartographer",
+    "architecture_reviewer",
+    "correctness_reviewer",
+    "security_reviewer",
+    "test_reviewer",
+    "performance_reviewer",
+    "developer_experience_reviewer",
+    "documentation_reviewer",
+    "fix_prompt_writer",
+    "review_chair"
+  ]
+}

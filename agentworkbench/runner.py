@@ -12,6 +12,7 @@ from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.llm_clients.factory import create_llm_client
 
+from .repository_snapshot import create_repository_snapshot
 from .workflows import WorkflowTemplate, load_workflow
 
 WORKBENCH_HOME = Path(os.getenv("AGENTWORKBENCH_HOME", Path.home() / ".agentworkbench"))
@@ -93,13 +94,23 @@ def run_generic_workflow(
     subject: str,
     objective: str,
     data_files: list[str] | None = None,
+    repo_path: str | None = None,
+    max_repo_bytes: int = 180_000,
     llm_provider: str = "codex",
     model: str = "default",
     output_dir: Path = RUNS_DIR,
     llm: Any | None = None,
 ) -> dict[str, Any]:
     data_files = data_files if data_files is not None else workflow.default_data_files
-    data_pack = load_data_pack(data_files)
+    data_pack_parts: list[str] = []
+    source_metadata: dict[str, Any] = {}
+    if data_files:
+        data_pack_parts.append(load_data_pack(data_files))
+    if repo_path:
+        snapshot = create_repository_snapshot(repo_path, max_bytes=max_repo_bytes)
+        data_pack_parts.append(snapshot.content)
+        source_metadata["repository_snapshot"] = snapshot.metadata()
+    data_pack = "\n\n---\n\n".join(part for part in data_pack_parts if part)
     role_map = workflow.role_map
     llm = llm or create_llm_client(llm_provider, model).get_llm()
 
@@ -129,6 +140,8 @@ def run_generic_workflow(
         "subject": subject,
         "objective": objective,
         "data_files": data_files,
+        "repo_path": repo_path,
+        "source_metadata": source_metadata,
         "llm_provider": llm_provider,
         "model": model,
         "outputs": outputs,
@@ -167,6 +180,8 @@ def run_workflow(
     subject: str,
     objective: str,
     data_files: list[str] | None = None,
+    repo_path: str | None = None,
+    max_repo_bytes: int = 180_000,
     llm_provider: str = "codex",
     model: str = "default",
     output_dir: Path = RUNS_DIR,
@@ -184,6 +199,8 @@ def run_workflow(
         subject=subject,
         objective=objective,
         data_files=data_files,
+        repo_path=repo_path,
+        max_repo_bytes=max_repo_bytes,
         llm_provider=llm_provider,
         model=model,
         output_dir=output_dir,
@@ -198,6 +215,23 @@ def render_report(run: dict[str, Any]) -> str:
         f"Created: {run['created_at']}",
         "",
     ]
+    source_metadata = run.get("source_metadata") or {}
+    repo_snapshot = (
+        source_metadata.get("repository_snapshot")
+        if isinstance(source_metadata, dict)
+        else None
+    )
+    if repo_snapshot:
+        lines.extend([
+            "## Review input",
+            "",
+            f"- Repository: `{repo_snapshot.get('repo_path')}`",
+            f"- Git HEAD: `{repo_snapshot.get('git_head') or 'unknown'}`",
+            f"- Files included: {repo_snapshot.get('files_included')} / {repo_snapshot.get('total_files_seen')}",
+            f"- Snapshot bytes: {repo_snapshot.get('bytes_included')}",
+            f"- Truncated: {repo_snapshot.get('truncated')}",
+            "",
+        ])
     for output in run["outputs"]:
         lines.extend([f"## {output['role']}", "", output["output"], ""])
     return "\n".join(lines)

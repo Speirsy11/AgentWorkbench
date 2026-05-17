@@ -31,3 +31,24 @@ def test_runs_generic_workflow_with_fake_llm(tmp_path):
     assert payload["subject"] == "Test subject"
     assert len(payload["outputs"]) == 3
     assert (tmp_path / "runs" / payload["id"] / "report.md").exists()
+
+
+from agentworkbench.repository_snapshot import create_repository_snapshot
+
+
+def test_code_review_workflow_loads():
+    workflow = load_workflow("code_review_board")
+    assert workflow.id == "code_review_board"
+    assert workflow.flow[-2:] == ["fix_prompt_writer", "review_chair"]
+
+
+def test_repository_snapshot_excludes_secrets(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "README.md").write_text("# Demo")
+    (repo / "app.py").write_text("print('hello')")
+    (repo / ".env").write_text("SECRET=do-not-include")
+    snapshot = create_repository_snapshot(repo, max_bytes=10_000)
+    assert "app.py" in snapshot.content
+    assert "SECRET=do-not-include" not in snapshot.content
+    assert snapshot.files_included >= 2

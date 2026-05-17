@@ -28,6 +28,8 @@ def run(
     objective: str = typer.Option("Produce a decision-ready analysis.", "--objective", "-o"),
     workflow: str = typer.Option("general_research", "--workflow", "-w"),
     data_file: Optional[List[Path]] = typer.Option(None, "--data-file", "-d"),
+    repo_path: Optional[Path] = typer.Option(None, "--repo-path", "-r", help="Local repository to snapshot and include as the data pack."),
+    max_repo_bytes: int = typer.Option(180_000, "--max-repo-bytes", help="Maximum bytes from the repository snapshot."),
     llm_provider: str = typer.Option("codex", "--llm-provider"),
     model: str = typer.Option("default", "--model"),
 ) -> None:
@@ -37,6 +39,8 @@ def run(
         subject=subject,
         objective=objective,
         data_files=[str(path) for path in data_file] if data_file else None,
+        repo_path=str(repo_path) if repo_path else None,
+        max_repo_bytes=max_repo_bytes,
         llm_provider=llm_provider,
         model=model,
     )

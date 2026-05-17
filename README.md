@@ -54,6 +54,33 @@ The web UI is intentionally dependency-light and runs at `http://127.0.0.1:8765`
 - `market_research` — a generic version of the TradingAgents-style context/bull/bear/risk/decision flow.
 - `trading_agents_legacy` — the original finance-specific TradingAgents graph preserved as a selectable workflow.
 
+
+## Code Review Board workflow
+
+AgentWorkbench now includes a saved `code_review_board` workflow for comprehensive repository reviews. Point it at a local repo and the runner creates a safe text snapshot of tracked source/config/docs files while excluding common secret, binary, build, and dependency directories.
+
+```bash
+agentworkbench run "AgentWorkbench" \
+  --workflow code_review_board \
+  --repo-path /Users/charliespeirs/Developer/AgentWorkbench \
+  --objective "Perform a comprehensive code review and produce fix prompts."
+```
+
+The workflow uses these roles:
+
+- Repository Cartographer
+- Architecture Reviewer
+- Correctness & Edge-Case Reviewer
+- Security & Privacy Reviewer
+- Testing & Quality Reviewer
+- Performance & Scalability Reviewer
+- Developer Experience Reviewer
+- Documentation & User Experience Reviewer
+- AI Fix Prompt Writer
+- Review Chair
+
+The final report includes a polished review plus ready-to-use prompts for coding agents/developers to fix the highest-priority issues.
+
 ## Defining your own workflow
 
 Create a JSON file like `agentworkbench/templates/general_research.json` with `roles`, `flow`, and optional `default_data_files`. Each role gets the subject, objective, supplied data pack, and prior role outputs. This makes the agent roles and analysed thing interchangeable without changing Python code.
