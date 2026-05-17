@@ -152,6 +152,8 @@ For enterprise providers (e.g. Azure OpenAI, AWS Bedrock), copy `.env.enterprise
 
 For local models, configure Ollama with `llm_provider: "ollama"` in your config.
 
+To use an authenticated Codex CLI subscription instead of direct API-key LLM calls, install and sign in to the `codex` CLI, then choose **Codex CLI (local subscription)** in the interactive provider picker or set `llm_provider: "codex"`. You can override the executable and runtime options with `TRADINGAGENTS_CODEX_COMMAND`, `TRADINGAGENTS_CODEX_TIMEOUT`, and `TRADINGAGENTS_CODEX_EXTRA_ARGS`.
+
 Alternatively, copy `.env.example` to `.env` and fill in your keys:
 ```bash
 cp .env.example .env
@@ -184,7 +186,7 @@ An interface will appear showing results as they load, letting you track the age
 
 ### Implementation Details
 
-We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, DeepSeek, Qwen (Alibaba DashScope), GLM (Zhipu), OpenRouter, Ollama for local models, and Azure OpenAI for enterprise.
+We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Codex CLI, Google, Anthropic, xAI, DeepSeek, Qwen (Alibaba DashScope), GLM (Zhipu), OpenRouter, Ollama for local models, and Azure OpenAI for enterprise.
 
 ### Python Usage
 
@@ -208,7 +210,7 @@ from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
 config = DEFAULT_CONFIG.copy()
-config["llm_provider"] = "openai"        # openai, google, anthropic, xai, deepseek, qwen, glm, openrouter, ollama, azure
+config["llm_provider"] = "openai"        # openai, codex, google, anthropic, xai, deepseek, qwen, glm, openrouter, ollama, azure
 config["deep_think_llm"] = "gpt-5.4"     # Model for complex reasoning
 config["quick_think_llm"] = "gpt-5.4-mini" # Model for quick tasks
 config["max_debate_rounds"] = 2

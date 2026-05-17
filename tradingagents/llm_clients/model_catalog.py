@@ -23,6 +23,16 @@ MODEL_OPTIONS: ProviderModeOptions = {
             ("GPT-5.4 Pro - Most capable, expensive ($30/$180 per 1M tokens)", "gpt-5.4-pro"),
         ],
     },
+    "codex": {
+        "quick": [
+            ("Codex CLI default/model alias", "gpt-5.1-codex"),
+            ("Custom model ID", "custom"),
+        ],
+        "deep": [
+            ("Codex CLI default/model alias", "gpt-5.1-codex"),
+            ("Custom model ID", "custom"),
+        ],
+    },
     "anthropic": {
         "quick": [
             ("Claude Sonnet 4.6 - Best speed and intelligence balance", "claude-sonnet-4-6"),
