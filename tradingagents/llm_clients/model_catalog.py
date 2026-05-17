@@ -25,11 +25,13 @@ MODEL_OPTIONS: ProviderModeOptions = {
     },
     "codex": {
         "quick": [
-            ("Codex CLI default/model alias", "gpt-5.1-codex"),
+            ("Codex CLI account default", "default"),
+            ("GPT-5.5 via Codex CLI", "gpt-5.5"),
             ("Custom model ID", "custom"),
         ],
         "deep": [
-            ("Codex CLI default/model alias", "gpt-5.1-codex"),
+            ("Codex CLI account default", "default"),
+            ("GPT-5.5 via Codex CLI", "gpt-5.5"),
             ("Custom model ID", "custom"),
         ],
     },

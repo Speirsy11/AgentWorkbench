@@ -7,7 +7,7 @@ from tradingagents.llm_clients.factory import create_llm_client
 
 
 def test_factory_creates_codex_cli_client():
-    client = create_llm_client("codex", "gpt-5.1-codex")
+    client = create_llm_client("codex", "default")
     assert client.__class__.__name__ == "CodexCLIClient"
 
 
@@ -37,3 +37,22 @@ def test_codex_cli_invokes_exec_with_prompt_on_stdin(tmp_path: Path):
     assert argv.split("PROMPT\n", 1)[1].startswith("System:\nBe concise.")
     assert "User:\nSay hello." in argv
     assert result.tool_calls == []
+
+
+def test_codex_cli_default_model_omits_model_flag(tmp_path: Path):
+    log = tmp_path / "argv.txt"
+    fake = tmp_path / "codex"
+    fake.write_text(
+        "#!/usr/bin/env python3\n"
+        "import pathlib, sys\n"
+        f"pathlib.Path({str(log)!r}).write_text('\\n'.join(sys.argv[1:]))\n"
+        "print('codex response')\n"
+    )
+    fake.chmod(0o755)
+
+    llm = CodexCLIChatModel("default", codex_command=str(fake), timeout=5)
+    result = llm.invoke("Say hello.")
+
+    assert result.content == "codex response"
+    argv = log.read_text()
+    assert "--model" not in argv

@@ -152,7 +152,7 @@ For enterprise providers (e.g. Azure OpenAI, AWS Bedrock), copy `.env.enterprise
 
 For local models, configure Ollama with `llm_provider: "ollama"` in your config.
 
-To use an authenticated Codex CLI subscription instead of direct API-key LLM calls, install and sign in to the `codex` CLI, then choose **Codex CLI (local subscription)** in the interactive provider picker or set `llm_provider: "codex"`. You can override the executable and runtime options with `TRADINGAGENTS_CODEX_COMMAND`, `TRADINGAGENTS_CODEX_TIMEOUT`, and `TRADINGAGENTS_CODEX_EXTRA_ARGS`.
+To use an authenticated Codex CLI subscription instead of direct API-key LLM calls, install and sign in to the `codex` CLI, then choose **Codex CLI (local subscription)** in the interactive provider picker or set `llm_provider: "codex"`. Choose the `default` model to let the CLI use the model available to the signed-in account, or select/provide a specific Codex-supported model. You can override the executable and runtime options with `TRADINGAGENTS_CODEX_COMMAND`, `TRADINGAGENTS_CODEX_TIMEOUT`, and `TRADINGAGENTS_CODEX_EXTRA_ARGS`.
 
 Alternatively, copy `.env.example` to `.env` and fill in your keys:
 ```bash

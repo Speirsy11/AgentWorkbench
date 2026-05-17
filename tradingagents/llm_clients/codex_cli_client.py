@@ -100,11 +100,11 @@ class CodexCLIChatModel(Runnable[Any, AIMessage]):
             "--skip-git-repo-check",
             "--color",
             "never",
-            "--model",
-            self.model,
             *self.extra_args,
             "-",
         ]
+        if self.model not in {"default", "codex-default", ""}:
+            command[-1:-1] = ["--model", self.model]
         try:
             completed = subprocess.run(
                 command,
